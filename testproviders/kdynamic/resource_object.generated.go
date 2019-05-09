@@ -4,37 +4,11 @@ package main
 
 import (
 	terraformpluginsdk "github.com/hashicorp/terraform-plugin-sdk"
-	errors "github.com/pkg/errors"
 	cty "github.com/zclconf/go-cty/cty"
-	gocty "github.com/zclconf/go-cty/cty/gocty"
 )
 
 func (r *resourceObject) Schema() terraformpluginsdk.Schema {
 	return terraformpluginsdk.Schema{Block: terraformpluginsdk.Block{Attributes: []terraformpluginsdk.Attribute{terraformpluginsdk.Attribute{
-		Computed:  false,
-		ForceNew:  true,
-		Name:      "group",
-		Optional:  true,
-		Required:  false,
-		Sensitive: false,
-		Type:      cty.String,
-	}, terraformpluginsdk.Attribute{
-		Computed:  false,
-		ForceNew:  true,
-		Name:      "version",
-		Optional:  false,
-		Required:  true,
-		Sensitive: false,
-		Type:      cty.String,
-	}, terraformpluginsdk.Attribute{
-		Computed:  false,
-		ForceNew:  true,
-		Name:      "kind",
-		Optional:  false,
-		Required:  true,
-		Sensitive: false,
-		Type:      cty.String,
-	}, terraformpluginsdk.Attribute{
 		Computed:  false,
 		ForceNew:  false,
 		Name:      "object",
@@ -56,24 +30,6 @@ func (r *resourceObject) UnmarshalState(conf cty.Value) error {
 	var err error
 	_ = err
 	if !conf.IsNull() && conf.IsKnown() {
-		if !conf.GetAttr("group").IsNull() && conf.GetAttr("group").IsKnown() {
-			err = gocty.FromCtyValue(conf.GetAttr("group"), &r.Group)
-			if err != nil {
-				return errors.WithStack(err)
-			}
-		}
-		if !conf.GetAttr("version").IsNull() && conf.GetAttr("version").IsKnown() {
-			err = gocty.FromCtyValue(conf.GetAttr("version"), &r.Version)
-			if err != nil {
-				return errors.WithStack(err)
-			}
-		}
-		if !conf.GetAttr("kind").IsNull() && conf.GetAttr("kind").IsKnown() {
-			err = gocty.FromCtyValue(conf.GetAttr("kind"), &r.Kind)
-			if err != nil {
-				return errors.WithStack(err)
-			}
-		}
 		r.Object = terraformpluginsdk.Dynamic{Value: conf.GetAttr("object")}
 		r.Result = terraformpluginsdk.Dynamic{Value: conf.GetAttr("result")}
 	}
@@ -85,24 +41,6 @@ func (r *resourceObject) MarshalState() (cty.Value, error) {
 	var state cty.Value
 	{
 		state1 := map[string]cty.Value{}
-		{
-			state1["group"], err = gocty.ToCtyValue(r.Group, cty.String)
-			if err != nil {
-				return cty.NilVal, errors.WithStack(err)
-			}
-		}
-		{
-			state1["version"], err = gocty.ToCtyValue(r.Version, cty.String)
-			if err != nil {
-				return cty.NilVal, errors.WithStack(err)
-			}
-		}
-		{
-			state1["kind"], err = gocty.ToCtyValue(r.Kind, cty.String)
-			if err != nil {
-				return cty.NilVal, errors.WithStack(err)
-			}
-		}
 		state1["object"] = r.Object.Value
 		state1["result"] = r.Result.Value
 		state = cty.ObjectVal(state1)

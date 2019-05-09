@@ -29,9 +29,6 @@ func TestAccResourceObject(t *testing.T) {
 func testAccResourceObjectConfig() string {
 	return `
 resource "kdynamic_object" "cmtest" {
-	version = "v1"
-	kind = "configmaps"
-
 	object = {
 		apiVersion = "v1"
 		kind = "ConfigMap"
@@ -54,9 +51,6 @@ output "result_metadata_namespace" {
 func testAccResourceObjectConfigUpdated() string {
 	return `
 resource "kdynamic_object" "cmtest" {
-	version = "v1"
-	kind = "configmaps"
-
 	object = {
 		apiVersion = "v1"
 		kind = "ConfigMap"
@@ -66,7 +60,7 @@ resource "kdynamic_object" "cmtest" {
 		data = {
 			key1 = "value1"
 			key2 = "value2"
-			key3 = 4
+			key3 = "4"
 		}
 	}
 }

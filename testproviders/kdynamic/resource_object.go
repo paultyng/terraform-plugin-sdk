@@ -6,11 +6,10 @@ import (
 
 	sdk "github.com/hashicorp/terraform-plugin-sdk"
 	"github.com/pkg/errors"
-	"k8s.io/apimachinery/pkg/apis/meta/v1/unstructured"
-	"k8s.io/apimachinery/pkg/runtime/schema"
-	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
-	_ "k8s.io/client-go/plugin/pkg/client/auth"
 	apierrors "k8s.io/apimachinery/pkg/api/errors"
+	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+	"k8s.io/apimachinery/pkg/apis/meta/v1/unstructured"
+	_ "k8s.io/client-go/plugin/pkg/client/auth"
 )
 
 const defaultNamespace = "default"
@@ -19,27 +18,14 @@ const defaultNamespace = "default"
 type resourceObject struct {
 	provider *provider
 
-	Group   string `tf:"group,optional,forcenew"`
-	Version string `tf:"version,required,forcenew"`
-	Kind    string `tf:"kind,required,forcenew"`
-	
 	Object sdk.Dynamic `tf:"object,required"`
 	Result sdk.Dynamic `tf:"result,computed"`
-}
-
-func (r *resourceObject) gvr() schema.GroupVersionResource {
-	// TODO: figure these out automatically? hopefully can just infer this from the object?
-	return schema.GroupVersionResource{
-		Group:    r.Group,
-		Version:  r.Version,
-		Resource: r.Kind,
-	}
 }
 
 func (r *resourceObject) Create(ctx context.Context) error {
 	// see https://github.com/kubernetes/kubernetes/pull/76513/files
 
-	client, err := r.provider.client()
+	client, mapper, err := r.provider.client()
 	if err != nil {
 		return errors.WithStack(err)
 	}
@@ -53,7 +39,14 @@ func (r *resourceObject) Create(ctx context.Context) error {
 		Object: objRaw,
 	}
 
-	result, err := client.Resource(r.gvr()).
+	gvk := obj.GroupVersionKind()
+
+	mapping, err := mapper.RESTMapping(gvk.GroupKind(), gvk.Version)
+	if err != nil {
+		return errors.WithStack(err)
+	}
+
+	result, err := client.Resource(mapping.Resource).
 		Namespace(defaultNamespace).
 		Create(obj, metav1.CreateOptions{})
 	if err != nil {
@@ -71,7 +64,7 @@ func (r *resourceObject) Create(ctx context.Context) error {
 }
 
 func (r *resourceObject) Read(ctx context.Context) error {
-	client, err := r.provider.client()
+	client, mapper, err := r.provider.client()
 	if err != nil {
 		return errors.WithStack(err)
 	}
@@ -85,9 +78,16 @@ func (r *resourceObject) Read(ctx context.Context) error {
 		Object: objRaw,
 	}
 
+	gvk := obj.GroupVersionKind()
+
+	mapping, err := mapper.RESTMapping(gvk.GroupKind(), gvk.Version)
+	if err != nil {
+		return errors.WithStack(err)
+	}
+
 	name := obj.GetName()
 
-	result, err := client.Resource(r.gvr()).
+	result, err := client.Resource(mapping.Resource).
 		Namespace(defaultNamespace).
 		Get(name, metav1.GetOptions{})
 	if err != nil {
@@ -101,11 +101,11 @@ func (r *resourceObject) Read(ctx context.Context) error {
 	r.Result = sdk.Dynamic{}
 	r.Result.SetValueFromMap(result.Object)
 
-	return nil	
+	return nil
 }
 
 func (r *resourceObject) Delete(ctx context.Context) error {
-	client, err := r.provider.client()
+	client, mapper, err := r.provider.client()
 	if err != nil {
 		return errors.WithStack(err)
 	}
@@ -119,9 +119,16 @@ func (r *resourceObject) Delete(ctx context.Context) error {
 		Object: objRaw,
 	}
 
+	gvk := obj.GroupVersionKind()
+
+	mapping, err := mapper.RESTMapping(gvk.GroupKind(), gvk.Version)
+	if err != nil {
+		return errors.WithStack(err)
+	}
+
 	name := obj.GetName()
 
-	err = client.Resource(r.gvr()).
+	err = client.Resource(mapping.Resource).
 		Namespace(defaultNamespace).
 		Delete(name, &metav1.DeleteOptions{})
 	if err != nil {
