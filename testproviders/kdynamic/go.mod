@@ -11,3 +11,5 @@ require (
 )
 
 replace github.com/hashicorp/terraform-plugin-sdk => ../../
+
+// github.com/hashicorp/terraform => ../../../terraform

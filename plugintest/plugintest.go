@@ -507,7 +507,7 @@ func grpcTestProvider(p sdk.Provider) (providers.Interface, error) {
 	client, _ := pp.GRPCClient(context.Background(), nil, conn)
 
 	grpcClient := client.(*tfplugin.GRPCProvider)
-	grpcClient.TestListener = listener
+	//grpcClient.TestListener = listener
 
 	return grpcClient, nil
 }

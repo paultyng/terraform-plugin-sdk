@@ -16,7 +16,7 @@ require (
 	github.com/hashicorp/hcl v1.0.0 // indirect
 	github.com/hashicorp/hil v0.0.0-20190212132231-97b3a9cdfa93 // indirect
 	github.com/hashicorp/logutils v1.0.0
-	github.com/hashicorp/terraform v0.12.0-rc1
+	github.com/hashicorp/terraform v0.12.0-rc1.0.20190509192024-c6e32f148dd3
 	github.com/hashicorp/terraform-config-inspect v0.0.0-20190327195015-8022a2663a70
 	github.com/hashicorp/yamux v0.0.0-20181012175058-2f1d1f20f75d // indirect
 	github.com/kylelemons/godebug v1.0.0 // indirect
@@ -36,4 +36,5 @@ require (
 	google.golang.org/grpc v1.19.0
 )
 
+// replace github.com/hashicorp/terraform => ../terraform
 // replace github.com/zclconf/go-cty => ../../zclconf/go-cty
