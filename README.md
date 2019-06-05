@@ -68,7 +68,7 @@ type Resource interface {
 }
 ```
 
-You can optional implement the `Updater` interface:
+You can optionally implement the `Updater` interface:
 
 ```go
 type Updater interface {
@@ -86,6 +86,32 @@ To generate the missing methods for your interface implementation, add a `go gen
 
 The generated output will contain the methods mentioned above, as well as an `init` implementation that registers the resource or data source with the provider.
 
+### Advanced Implementation Details
+
+#### Dynamic Attribute Support
+
+You can use the SDK type `Dynamic` for an attribute to allow for dynamic complex types to be consumed by the plugin.
+
+#### Diagnostics vs Errors
+
+Instead of returning a generic `error` from a method implementation, you can instead return `Diagnostics` which allow you to provide richer error and warning information for the user.
+
+#### Validation
+
+TBD
+
+#### Custom Types / Aliases
+
+Attributes support the use of custom types or aliases. This is especially useful for common parsing or validation behaviors.
+
+Those types can implement their own custom validation with the `Validator` interface:
+
+```go
+type Validator interface {
+	Validate() error
+}
+```
+
 ### Testing
 
 The `plugintest` package has a contract similar to the testing from v1 of the SDK.
@@ -95,3 +121,9 @@ The `plugintest` package has a contract similar to the testing from v1 of the SD
 * [kydnamic](testproviders/kdynamic) - example of a Kubernetes provider using dynamic typing
 * [tls](https://github.com/paultyng/terraform-provider-tls/tree/sdk) - TLS provider re-implemented using this SDK
 * [http](https://github.com/paultyng/terraform-provider-http/tree/sdk) - HTTP provider re-implemented using this SDK
+
+## TODO
+
+* [ ] Provide access to prior state, config, planned state, etc. in resource / data source methods (potentially via `Context`)
+* [ ] Finish implementation of validation, need to generate a wrapper for whole resource and each attribute
+* [ ] Add block support for nested structs
